@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <div id="input">
+        <input type="text" name="nomeDoManga" id="nomeManga">
+        <button id="searchButton">Search</button>
+    </div>
+    
+    <div id="result" style='display: flex; flex-direction:column; width: 900px; margin: auto;' >
+
+    </div>
+
+    <script>
+        // const serverUrl = "https://manga-reader.syalpemagy.workers.dev"
+
+        const serverUrl = "http://localhost:8787"
+
+        document.getElementById("searchButton").addEventListener("click", async (e) => {
+            const name = document.getElementById("nomeManga").value
+            fetch(`${serverUrl}/search/${name}`).then(res => res.json()).then(result => {
+                const resultDiv = document.getElementById("result")
+                resultDiv.innerHTML = ""
+
+                result.forEach(manga => {
+                    resultDiv.innerHTML += `<a href="#" aria-name="${manga.name}" onclick="getChapters('${manga.name}')">${manga.title}</a>`
+                })
+
+            })
+        })
+
+        function getChapters(mangaName){
+
+            fetch(`${serverUrl}/${mangaName}`).then(res => res.json()).then(result => {
+                const resultDiv = document.getElementById("result")
+                resultDiv.innerHTML = ""
+
+                result.forEach(chapter => {
+                    resultDiv.innerHTML += `<a href="#" aria-name="${chapter.name}" onclick="readChapter('${mangaName}','${chapter.name}')">${chapter.title}</a>`
+                })
+
+            })
+        }
+
+        function readChapter(mangaName, chapterName){
+
+            fetch(`${serverUrl}/${mangaName}/${chapterName}`).then(res => res.json()).then(result => {
+                const resultDiv = document.getElementById("result")
+                resultDiv.innerHTML = ""
+
+                result.forEach(link => {
+                    resultDiv.innerHTML += `<img src="${link}" style="margin-bottom: 20px">`
+                })
+
+            })
+        }
+    </script>
+</body>
+</html>
