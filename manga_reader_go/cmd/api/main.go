@@ -4,11 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"manga-reader/internal/services"
 	"net/http"
 	"os"
 	"time"
-
-	"manga-reader/internal/services"
 )
 
 type config struct {
