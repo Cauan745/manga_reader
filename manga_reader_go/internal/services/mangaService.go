@@ -1,4 +1,4 @@
-package usecases
+package services
 
 import (
 	"encoding/json"
@@ -17,6 +17,19 @@ type ScraperApiConfig struct {
 
 type MangaService struct {
 	ApiConfig ScraperApiConfig
+}
+
+func NewMangaService() MangaService {
+	scraperApiConfig := ScraperApiConfig{
+		ApiUrl:         "http://localhost:8787",
+		SearchPath:     "/search",
+		GetMangaPath:   "",
+		GetChapterPath: "",
+	}
+
+	return MangaService{
+		ApiConfig: scraperApiConfig,
+	}
 }
 
 func fetch[result any](url string) (result, error) {

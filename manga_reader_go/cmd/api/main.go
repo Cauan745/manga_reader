@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"manga-reader/internal/usecases"
+	"manga-reader/internal/services"
 )
 
 type config struct {
@@ -18,20 +18,11 @@ type config struct {
 type application struct {
 	logger       *slog.Logger
 	config       config
-	mangaService usecases.MangaService
+	mangaService services.MangaService
 }
 
 func main() {
-	scraperApiConfig := usecases.ScraperApiConfig{
-		ApiUrl:         "http://localhost:8787",
-		SearchPath:     "/search",
-		GetMangaPath:   "",
-		GetChapterPath: "",
-	}
-
-	mangaService := usecases.MangaService{
-		ApiConfig: scraperApiConfig,
-	}
+	mangaService := services.NewMangaService()
 
 	cfg := config{
 		port: 8000,
