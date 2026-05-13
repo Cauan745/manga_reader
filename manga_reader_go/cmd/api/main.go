@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -22,12 +23,13 @@ type application struct {
 }
 
 func main() {
-	mangaService := services.NewMangaService()
+	var cfg config
 
-	cfg := config{
-		port: 8000,
-		env:  "development",
-	}
+	flag.IntVar(&cfg.port, "addr", 4000, "API server port")
+	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	flag.Parse()
+
+	mangaService := services.NewMangaService()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
