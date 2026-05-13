@@ -2,12 +2,24 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
+	"net/http"
 	"os"
+	"time"
 
 	"manga-reader/internal/usecases"
 )
 
-type application struct{}
+type config struct {
+	port int
+	env  string
+}
+
+type application struct {
+	logger       *slog.Logger
+	config       config
+	mangaService usecases.MangaService
+}
 
 func main() {
 	scraperApiConfig := usecases.ScraperApiConfig{
@@ -21,33 +33,33 @@ func main() {
 		ApiConfig: scraperApiConfig,
 	}
 
-	results, err := mangaService.SearchManga("naruto")
-	if err != nil {
-		panic(err)
+	cfg := config{
+		port: 8000,
+		env:  "development",
 	}
 
-	fmt.Println(results)
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	manga, err := mangaService.GetManga(results[0].Name)
-	if err != nil {
-		panic(err)
+	app := application{
+		config:       cfg,
+		logger:       logger,
+		mangaService: mangaService,
 	}
 
-	fmt.Println(manga)
-
-	chapter, err := mangaService.GetChapter(results[0].Name, manga.Chapters[0].Name)
-
-	fmt.Println(chapter)
-
-	htmlString := ""
-
-	for _, link := range chapter.PagesLinks {
-		htmlString = fmt.Sprintf(`%s\n<img src="%s">`, htmlString, link)
+	// Use the httprouter instance returned by app.routes() as the server handler.
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%d", cfg.port),
+		Handler:      app.routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
-	erro := os.WriteFile("capitulo.html", []byte(htmlString), 0o644)
+	logger.Info("starting server", "addr", srv.Addr, "env", cfg.env)
 
-	if erro != nil {
-		panic(err)
-	}
+	err := srv.ListenAndServe()
+
+	logger.Error(err.Error())
+	os.Exit(1)
 }
