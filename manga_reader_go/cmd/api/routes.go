@@ -11,11 +11,11 @@ func (a *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/health", a.healthcheckHandler)
 
-	router.HandlerFunc(http.MethodGet, "/manga", a.searchManga)
-	router.HandlerFunc(http.MethodGet, "/manga/:name", a.getManga)
-	router.HandlerFunc(http.MethodGet, "/read/:mangaName/:chapterName", a.getChapter)
-
 	router.HandlerFunc(http.MethodPost, "/user/register", a.registerUser)
+
+	router.Handler(http.MethodGet, "/manga", a.authMiddleware(a.searchManga))
+	router.Handler(http.MethodGet, "/manga/:name", a.authMiddleware(a.getManga))
+	router.Handler(http.MethodGet, "/read/:mangaName/:chapterName", a.authMiddleware(a.getChapter))
 
 	return a.logMiddleware(router)
 }
